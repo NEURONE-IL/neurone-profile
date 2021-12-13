@@ -2,7 +2,7 @@ import express from 'express';
 import { MongoClientOptions } from 'mongodb';
 import mongodb = require('mongodb');
 const MongoClient = mongodb.MongoClient;
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
 // Connect URL
 const url = 'mongodb://127.0.0.1:27017/test';
@@ -20,12 +20,11 @@ mongoose.connect(url, {}, (err) => {
     
     if (err) {
         console.log(err);
+    } else {
+        console.log(`MongoDB Connected: ${url}`);
     }
 
-    // Specify database you want to access
-    //const db = client.db('neurone');
-
-    console.log(`MongoDB Connected: ${url}`);
+    
 });
 
 mongoose.connection.on('error', err => {
@@ -38,7 +37,17 @@ mongoose.connection.on('error', err => {
 
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({extended: true})); // Parse URL-encoded bodies
 const port = 3002;
+
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" )
+    next();
+});
+
 app.get('/', (req, res) => {
     res.send(`This is the neurone-profile backend on port ${port}!`);
 });
