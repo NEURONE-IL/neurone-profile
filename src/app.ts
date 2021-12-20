@@ -23,7 +23,6 @@ mongoose.connect(url, {}, (err) => {
     } else {
         console.log(`MongoDB Connected: ${url}`);
     }
-
     
 });
 

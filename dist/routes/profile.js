@@ -5,21 +5,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var mongoose_1 = __importDefault(require("mongoose"));
+var Profile = require('../models/profile');
+var neuroneCheckAuth = require('../middleware/check-neurone-auth');
 var router = express_1.default.Router();
-router.post("profile/number", function (req, res) {
+router.post("/profile/number", neuroneCheckAuth, function (req, res) {
     try {
         console.log("let's see...\n" + req.body.email + "\n" + req.body.number);
-        var profileSchema = new mongoose_1.default.Schema({
-            email: String,
-            number: Number
-        });
-        var Profile = mongoose_1.default.model('Profile', profileSchema);
         var User = new Profile({
             email: req.body.email,
             number: req.body.number
         });
-        User.save().then();
-        res.status(201).json({ message: "created" });
+        User.save().then(function (result) {
+            console.log(result);
+            res.status(201).json({ message: "created", object: result });
+        })
+            .catch(function (err) {
+            console.error(err);
+        });
     }
     catch (err) {
         console.error(err);
