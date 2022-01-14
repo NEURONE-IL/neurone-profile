@@ -1,9 +1,9 @@
 import express from 'express';
-import mongoose, { Schema } from 'mongoose';
 const Profile = require('../models/profile');
 const FormAnswer = require('../models/form-answer');
 const Form = require('../models/form');
 const neuroneCheckAuth = require('../middleware/check-neurone-auth');
+const useragent = require('useragent');
 
 
 const router = express.Router();
@@ -137,6 +137,18 @@ router.post("/api/kitten", (req, res) => {
   res.status(201).json({message: "created"});
 });
 */
+
+router.get("/test", (req, res) => {
+
+  const browser = useragent.parse(req.headers['user-agent']);
+  res.status(200).json({message: "ok", youare: browser.toString()});
+
+});
+
+
+
+
+
 
 router.post("/profile/number", neuroneCheckAuth, (req, res) => {
 

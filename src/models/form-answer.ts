@@ -9,9 +9,12 @@ const formSchema = new mongoose.Schema({
   questions: [{
     question: { type: String, required: true },
     formType: { type: String, required: true },
-    answer: { type: String, required: true },
+    answer: { type: String },
+    answerArray: [{ // for answers like checkbox answers that include many different answers
+      question: { type: String, required: true },
+      answer: { type: Boolean, required: true }
+    }]
   }]
-
 })
 
-module.exports = mongoose.model('form-Answer', formSchema);
+module.exports = mongoose.model('form-answer', formSchema);

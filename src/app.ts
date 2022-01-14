@@ -1,38 +1,35 @@
 import express from 'express';
-import { MongoClientOptions } from 'mongodb';
-import mongodb = require('mongodb');
-const MongoClient = mongodb.MongoClient;
 import mongoose from 'mongoose';
 
 // Connect URL
 const url = 'mongodb://127.0.0.1:27017/test';
 
 const options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    poolSize: parseInt(process.env.POOL_SIZE!),
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
 };
 
-// Connect to MongoDB
-mongoose.connect(url, {}, (err) => {
-    
+
+function connectToDB(){
+  // Connect to MongoDB
+  mongoose.connect(url, options, async (err) => {
+
     if (err) {
-        console.log(err);
+      console.error(err);
     } else {
-        console.log(`MongoDB Connected: ${url}`);
+      console.log(`MongoDB Connected: ${url}`);
     }
-    
-});
+  });
+}
 
 mongoose.connection.on('error', err => {
-    console.error(err);
+  console.error(err);
+  console.log("Retrying connection with database...");
+  connectToDB();
 });
 
-
-
-
+connectToDB();
 
 
 const app = express();
@@ -56,3 +53,4 @@ app.listen(port, () => {
 
 
 app.use(require('./routes/profile') );
+app.use(require('./routes/logger'));

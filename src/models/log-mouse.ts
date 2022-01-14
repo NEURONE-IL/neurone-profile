@@ -1,0 +1,36 @@
+import mongoose from 'mongoose';
+
+const logMouseSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "Profile", required: true },
+  userEmail: { type: String },
+  type  : { type: String },
+  source: { type: String },
+  url   : { type: String },
+  dateClient: { type: Date },
+  dateServer: { type: Date },
+  x_win : { type: Number },
+  y_win : { type: Number },
+  w_win : { type: Number },
+  h_win : { type: Number },
+  x_doc : { type: Number },
+  y_doc : { type: Number },
+  w_doc : { type: Number },
+  h_doc : { type: Number },
+});
+
+const logKeyboardSchema = new mongoose.Schema({
+  logtype   : { type: String },
+  userId    : { type: mongoose.Schema.Types.ObjectId, ref: "Profile", required: true },
+  type      : { type: String },
+  source    : { type: String },
+  target    : { type: String },
+  url       : { type: String },
+  dateClient: { type: Date },
+  dateServer: { type: Date },
+  which     : { type: String },
+  keyCode   : { type: String },
+  charCode  : { type: String },
+  key       : { type: String },
+});
+
+module.exports = mongoose.model('log-mouse', logMouseSchema);
