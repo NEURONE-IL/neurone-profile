@@ -35,7 +35,7 @@ connectToDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true})); // Parse URL-encoded bodies
-const port = 3002;
+const port = process.env.PORT || 3002;
 
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");

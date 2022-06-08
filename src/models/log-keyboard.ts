@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const logKeyboardSchema = new mongoose.Schema({
-  logtype   : { type: String },
   userId    : { type: mongoose.Schema.Types.ObjectId, ref: "Profile", required: true },
+  userEmail : { type: String }, 
   type      : { type: String },
   source    : { type: String },
   target    : { type: String },

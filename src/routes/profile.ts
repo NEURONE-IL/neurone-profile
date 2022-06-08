@@ -182,6 +182,7 @@ router.post("/profile/form", neuroneCheckAuth, (req, res) => {
 
   const form = new FormAnswer({
     userId: req.body.userId,
+    username: req.body.username,
     formId: req.body.formId,
     clientDate: req.body.clientDate,
     serverDate: currentDate,

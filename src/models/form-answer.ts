@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const formSchema = new mongoose.Schema({
 
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "Profile", required: true },
+  username: { type: String },
   formId: { type: String, required: true },
   clientDate: { type: Date },
   serverDate: { type: Date },
