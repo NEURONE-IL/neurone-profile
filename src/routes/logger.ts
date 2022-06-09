@@ -5,6 +5,7 @@ const useragent = require('useragent');
 const LogMouse = require('../models/log-mouse');
 const LogKeyboard = require('../models/log-keyboard');
 const LogScroll = require('../models/log-scroll');
+const LogSearchNav = require('../models/log-search-navigation');
 const router = express.Router();
 
 router.post("/logger/mouse", (req, res) => {
@@ -93,5 +94,41 @@ router.post("/logger/scroll", (req, res) => {
   });
 
 });
+
+// log for the search navigation of the user
+router.post("/logger/search/", async (req, res) => {
+  console.log("data:");
+  console.log(req.body);
+
+  const currDate = Date.now();
+
+  const logData: Document = new LogSearchNav({
+    userId: req.body.userId,
+    userEmail: req.body.userEmail,
+    dateClient: req.body.date || req.body.dateClient,
+    dateServer: currDate,
+    timestampClient: req.body.date || req.body.timestampClient,
+    timestampServer: currDate,
+    description: req.body.description,
+    query: req.body.query,
+    selectedPageName: req.body.selectedPageName,
+    selectedPageUrl: req.body.selectedPageUrl,
+    relevant: req.body.relevant,
+    currentPageNumber: req.body.currentPageNumber,
+    resultDocumentRank: req.body.resultDocumentRank,
+    retultNumberTotal: req.body.resultNumberTotal,
+    searchResults: req.body.searchResults
+  });
+
+  console.log("document to save in db:\n", logData);
+
+  try{
+    await logData.save();
+    res.status(201).json({message: "Logged search"});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: "Error while saving search navigation log in database"});
+  }
+})
 
 module.exports = router;
