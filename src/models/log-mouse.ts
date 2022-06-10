@@ -18,4 +18,4 @@ const logMouseSchema = new mongoose.Schema({
   h_doc : { type: Number },
 });
 
-module.exports = mongoose.model('log-mouse', logMouseSchema);
+export default mongoose.model('log-mouse', logMouseSchema);

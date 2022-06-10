@@ -15,4 +15,4 @@ const logKeyboardSchema = new mongoose.Schema({
   key       : { type: String },
 });
 
-module.exports = mongoose.model('log-keyboard', logKeyboardSchema);
+export default mongoose.model('log-keyboard', logKeyboardSchema);

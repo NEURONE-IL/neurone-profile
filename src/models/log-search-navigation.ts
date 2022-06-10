@@ -18,4 +18,4 @@ const logSearchNavigationSchema = new mongoose.Schema({
   searchResults: [{ type: String }] // name of all the documents currently visibles in the serp
 });
 
-module.exports = mongoose.model('log-search-navigation', logSearchNavigationSchema);
+export default mongoose.model('log-search-navigation', logSearchNavigationSchema);

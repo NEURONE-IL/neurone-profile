@@ -1,14 +1,14 @@
 import express from 'express';
-import { SchemaMember } from 'mongodb';
-import { Document, Mongoose, Schema, SchemaType } from 'mongoose';
-const useragent = require('useragent');
-const LogMouse = require('../models/log-mouse');
-const LogKeyboard = require('../models/log-keyboard');
-const LogScroll = require('../models/log-scroll');
-const LogSearchNav = require('../models/log-search-navigation');
+import { Document } from 'mongoose';
+import useragent from 'useragent';
+import LogMouse from '../models/log-mouse';
+import LogKeyboard from '../models/log-keyboard';
+import LogScroll from '../models/log-scroll';
+import LogSearchNav from '../models/log-search-navigation';
+import neuroneCheckAuth from "../middleware/check-neurone-auth";
 const router = express.Router();
 
-router.post("/logger/mouse", (req, res) => {
+router.post("/logger/mouse", neuroneCheckAuth, async (req, res) => {
 
   let logData: Document;
 
@@ -30,16 +30,17 @@ router.post("/logger/mouse", (req, res) => {
     h_doc : req.body.h_doc
   });
 
-  logData.save().then((result) => {
+  try{
+    await logData.save();
     res.status(201).json({message: "Logged mouse."});
-  }).catch((error) => {
-    console.error(error);
+  } catch(err) {
+    console.error(err);
     res.status(500).json({message: "Error saving mouse log."});
-  });
+  };
 
 });
 
-router.post("/logger/keyboard", (req, res) => {
+router.post("/logger/keyboard", neuroneCheckAuth, async(req, res) => {
 
   let logData: Document;
 
@@ -58,15 +59,16 @@ router.post("/logger/keyboard", (req, res) => {
     key       : req.body.key
   });
 
-  logData.save().then(() => {
+  try {
+    await logData.save();
     res.status(201).json({message: "Logged keyboard."});
-  }).catch((error) => {
-    console.error(error);
+  } catch(err) {
+    console.error(err);
     res.status(500).json({message: "Error saving keyboard log."});
-  });
+  };
 });
 
-router.post("/logger/scroll", (req, res) => {
+router.post("/logger/scroll", neuroneCheckAuth, async (req, res) => {
 
   let logData: Document;
 
@@ -86,19 +88,18 @@ router.post("/logger/scroll", (req, res) => {
     h_doc : req.body.h_doc
   });
 
-  logData.save().then(() => {
+  try {
+    await logData.save()
     res.status(201).json({message: "Logged Scroll."});
-  }).catch((error) => {
-    console.error(error);
+  } catch(err) {
+    console.error(err);
     res.status(500).json({message: "Error saving Scroll log."});
-  });
+  }
 
 });
 
 // log for the search navigation of the user
-router.post("/logger/search/", async (req, res) => {
-  console.log("data:");
-  console.log(req.body);
+router.post("/logger/search/", neuroneCheckAuth,  async (req, res) => {
 
   const currDate = Date.now();
 
@@ -120,11 +121,9 @@ router.post("/logger/search/", async (req, res) => {
     searchResults: req.body.searchResults
   });
 
-  console.log("document to save in db:\n", logData);
-
   try{
     await logData.save();
-    res.status(201).json({message: "Logged search"});
+    res.status(201).json({message: "Logged search navigation"});
   } catch (err) {
     console.error(err);
     res.status(500).json({message: "Error while saving search navigation log in database"});

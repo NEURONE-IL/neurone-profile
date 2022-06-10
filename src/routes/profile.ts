@@ -1,9 +1,11 @@
 import express from 'express';
-const Profile = require('../models/profile');
-const FormAnswer = require('../models/form-answer');
-const Form = require('../models/form');
-const neuroneCheckAuth = require('../middleware/check-neurone-auth');
-const useragent = require('useragent');
+import mongoose from 'mongoose';
+import Profile from '../models/profile';
+import FormAnswer from '../models/form-answer';
+import Form from '../models/form'
+import SearchSavedData from '../models/search-saved-data';
+import neuroneCheckAuth from "../middleware/check-neurone-auth";
+import useragent from 'useragent';
 
 
 const router = express.Router();
@@ -154,20 +156,20 @@ router.post("/profile/number", neuroneCheckAuth, (req, res) => {
 
   try{
 
-    console.log("let's see...\n" + req.body.email + "\n" + req.body.number)
+    console.log("let's see...\n" + req.body.email + "\n" + req.body.number);
 
-      const User = new Profile({
-        email: req.body.email,
-            number: req.body.number
-      });
+    const User = new Profile({
+      email: req.body.email,
+          number: req.body.number
+    });
 
-      User.save().then( (result: any) => {
-        console.log(result);
-        res.status(201).json({message: "created", object: result})
-      })
-      .catch((err: any) => {
-        console.error(err)
-      });
+    User.save().then( (result: any) => {
+      console.log(result);
+      res.status(201).json({message: "created", object: result})
+    })
+    .catch((err: any) => {
+      console.error(err)
+    });
         
   } catch(err) {
     console.error(err);
@@ -314,5 +316,50 @@ router.delete("/form/:formName", neuroneCheckAuth, (req, res) => {
 
 });
 
+
+// search save data
+
+// TODO: consider generalize for bookmark and snippet
+router.get("/search/bookmark/:userId", neuroneCheckAuth, async (req, res) => {
+  
+  try {
+    const document = await SearchSavedData.findOne({userId: req.params.userId})
+    console.log(document);
+    if (document) {
+      res.status(200).json({message: "Success", data: document});
+    } else {
+      res.status(200).json({message: "Success, but no data found for this user", document: document});
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: "Error while getting user bookmarks"});
+  }
+
+})
+
+router.post("/search/bookmark", neuroneCheckAuth, async (req, res) => {
+
+  try {
+
+    const queryOptions: mongoose.QueryOptions = {
+      upsert: true,
+      new: true
+    }
+
+    // bookmark will be added to array only if it doesn't exist already
+    const newBookmark = {
+      $addToSet: {bookmarks: req.body.bookmark}
+    }
+
+    // save in database
+    const updatedDocument = await SearchSavedData.findOneAndUpdate({userId: req.body.userId}, newBookmark, queryOptions);
+    console.log("document is: ", updatedDocument);
+    res.status(201).json({message: "Saved bookmark successfully", document: updatedDocument});
+  } catch(err){
+    console.error(err);
+    res.status(500).json({ message: "Error while saving bookmark." });
+  }
+
+});
 
 module.exports = router;

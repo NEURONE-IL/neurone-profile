@@ -18,4 +18,4 @@ const logScrollSchema = new mongoose.Schema({
 
 });
 
-module.exports = mongoose.model('log-scroll', logScrollSchema);
+export default mongoose.model('log-scroll', logScrollSchema);
