@@ -6,6 +6,7 @@ import Form from '../models/form'
 import SearchSavedData from '../models/search-saved-data';
 import neuroneCheckAuth from "../middleware/check-neurone-auth";
 import useragent from 'useragent';
+import searchSavedData from '../models/search-saved-data';
 
 
 const router = express.Router();
@@ -340,7 +341,6 @@ router.get("/search/bookmark/:userId", neuroneCheckAuth, async (req, res) => {
 router.post("/search/bookmark", neuroneCheckAuth, async (req, res) => {
 
   try {
-
     const queryOptions: mongoose.QueryOptions = {
       upsert: true,
       new: true
@@ -360,6 +360,31 @@ router.post("/search/bookmark", neuroneCheckAuth, async (req, res) => {
     res.status(500).json({ message: "Error while saving bookmark." });
   }
 
+});
+
+router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
+
+  try {
+    const queryOptions: mongoose.QueryOptions = {
+      upsert: true,
+      new: true
+    }
+
+    // snippet will be added only if it doesn't exists already
+    const newSnippetData = {
+      $addToSet: { snippets: {
+        text: req.body.text, 
+        website: req.body.website}
+      }
+    }
+
+    // save in database
+    const updatedDocument = await searchSavedData.findOneAndUpdate({userId: req.body.userId}, newSnippetData, queryOptions);
+    res.status(201).json({message: "Saved snippet successfully", document: updatedDocument});
+  } catch(err){
+    console.error(err);
+    res.status(500).json({ message: "Error while saving snippet." });
+  }
 });
 
 module.exports = router;

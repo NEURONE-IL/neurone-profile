@@ -121,7 +121,7 @@ router.post("/logger/search/", neuroneCheckAuth,  async (req, res) => {
     searchResults: req.body.searchResults
   });
 
-  try{
+  try {
     await logData.save();
     res.status(201).json({message: "Logged search navigation"});
   } catch (err) {
