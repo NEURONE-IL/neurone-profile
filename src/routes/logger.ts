@@ -128,6 +128,6 @@ router.post("/logger/search/", neuroneCheckAuth,  async (req, res) => {
     console.error(err);
     res.status(500).json({message: "Error while saving search navigation log in database"});
   }
-})
+});
 
 module.exports = router;
