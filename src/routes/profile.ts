@@ -9,6 +9,7 @@ import useragent from 'useragent';
 import searchSavedData from '../models/search-saved-data';
 import LogUserData from '../models/log-user-data';
 import SearchBookmark from '../models/search-bookmark';
+import searchSnippet from '../models/search-snippet';
 
 
 const router = express.Router();
@@ -342,7 +343,7 @@ router.get("/search/bookmark/saved/:userId", neuroneCheckAuth, async (req, res) 
     console.log("BOOKMARKS:\n", bookmarkDocs);
 
     if (bookmarkDocs.length === 0) {
-      res.status(404);
+      res.status(404); // TODO: 200 con mensaje de vacío y data en vacío
     }
 
     res.status(200).json({message: "Bookmarks found", data: bookmarkDocs});
@@ -483,25 +484,33 @@ router.get("/search/bookmark/:userId", neuroneCheckAuth, async (req, res) => {
 
 router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
 
+  if (!mongoose.isValidObjectId(req.body.userId)) {
+    res.status(400).json({"message": "User Id (userId) is not a valid Mongo ID."});
+    return;
+  }
+
   try {
     const queryOptions: mongoose.QueryOptions = {
-      upsert: true,
       new: true
     }
 
-    // snippet will be added only if it doesn't exists already
-    const newSnippetData = {
-      $addToSet: { snippets: {
-        text: req.body.text, 
-        website: req.body.website,
-        }
-      }
-    }
+    const serverDate = Date.now();
+
+    const newSnippetData = new searchSnippet ({
+      userId: req.body.userId,
+      timestampClient: req.body.date,
+      timestampServer: serverDate,
+      dateClient: req.body.date,
+      dateServer: serverDate,
+      snippet: req.body.snippet,
+      website: req.body.website,
+      websiteUrl: req.body.websiteUrl,
+    });
 
     // save in database
-    const updatedDocument = await searchSavedData.findOneAndUpdate({userId: req.body.userId}, newSnippetData, queryOptions);
+    const newDocument = await newSnippetData.save(queryOptions);
 
-    res.status(201).json({message: "Saved snippet successfully", document: updatedDocument});
+    res.status(201).json({message: "Saved snippet successfully", document: newDocument});
   } catch(err){
     console.error(err);
     res.status(500).json({ message: "Error while saving snippet." });

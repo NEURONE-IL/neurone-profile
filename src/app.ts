@@ -3,7 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 
 // Connect URL
-const url = 'mongodb://127.0.0.1:27017/test';
+const url = process.env.DB || 'mongodb://127.0.0.1:27017/test';
 
 const options = {
   maxPoolSize: 10, // Maintain up to 10 socket connections

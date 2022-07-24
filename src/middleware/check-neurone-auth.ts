@@ -1,3 +1,4 @@
+import 'dotenv/config';
 const axios = require('axios').default;
 
 export default function(
@@ -6,11 +7,11 @@ export default function(
   next: () => void) {
 
   try {
-
-    const disabled = false;
-    if (disabled) {
+    
+    if (process.env.disableAuth) {
       console.log("*\n*\n*\n*\n*\n*\n*-------->CHECK AUTH DISABLED\n*\n*\n*\n*\n*\n*\n*\n*\n*\n");
       next();
+      return;
     }
 
     const neuroneAuthPort = process.env.NEURONE_AUTH_PORT || 3005;
@@ -36,7 +37,7 @@ export default function(
         }
       })
       .catch((err: any) => {
-        //console.error(err);
+        console.error(err);
         if (!res.headersSent){
           res.status(401).json({message: "Authentication with Neurone-Auth failed"});
         }
