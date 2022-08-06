@@ -1,9 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import Profile from '../models/profile';
+import Profile from '../models/profile'; // TODO: remove
 import FormAnswer from '../models/form-answer';
 import Form from '../models/form'
-import SearchSavedData from '../models/search-saved-data';
 import neuroneCheckAuth from "../middleware/check-neurone-auth";
 import useragent from 'useragent';
 import SearchBookmark from '../models/search-bookmark';
@@ -154,7 +153,7 @@ router.get("/test", (req, res) => {
 
 
 
-
+// TODO: likely unused, remove
 router.post("/profile/number", neuroneCheckAuth, (req, res) => {
 
   try{
@@ -163,7 +162,7 @@ router.post("/profile/number", neuroneCheckAuth, (req, res) => {
 
     const User = new Profile({
       email: req.body.email,
-          number: req.body.number
+      number: req.body.number
     });
 
     User.save().then( (result: any) => {
@@ -208,6 +207,7 @@ router.post("/profile/form", neuroneCheckAuth, (req, res) => {
 
 });
 
+// request a form with its name (unique)
 router.get("/form/:name", neuroneCheckAuth, (req, res) => {
 
   let retrievedForm;
@@ -263,6 +263,7 @@ router.get("/form/:name", neuroneCheckAuth, (req, res) => {
 
 });
 
+// save a form for later use
 router.post("/form", neuroneCheckAuth, (req, res) => {
 
   console.log("----------------------FORM PRINT START");
@@ -288,6 +289,7 @@ router.post("/form", neuroneCheckAuth, (req, res) => {
 
 });
 
+// 
 router.put("/form/:id", neuroneCheckAuth, (req, res) => {
 
   // update form in database or create it
@@ -420,6 +422,7 @@ router.post("/search/bookmark", neuroneCheckAuth, async (req, res) => {
 
 });
 
+// update a bookmark status for an user
 router.put("/search/bookmark/:userId/:docId", neuroneCheckAuth, async (req, res) => {
 
   if (!mongoose.isValidObjectId(req.params.userId)) {
@@ -463,24 +466,55 @@ router.put("/search/bookmark/:userId/:docId", neuroneCheckAuth, async (req, res)
 
 });
 
-
-router.get("/search/bookmark/:userId", neuroneCheckAuth, async (req, res) => {
+// get user data from the search (bookmark and snippets)
+router.get("/search/user/:userId", neuroneCheckAuth, async (req, res) => {
   
   try {
-    const document = await SearchSavedData.findOne({userId: req.params.userId})
-    console.log(document);
-    if (document) {
-      res.status(200).json({message: "Success", data: document});
+    const bookmarks = await SearchBookmark.find({userId: req.params.userId});
+    const snippets = await searchSnippet.find({userId: req.params.userId});
+    //console.log(bookmarks, snippets);
+    if (bookmarks || snippets) {
+      res.status(200).json({message: "Success", bookmarks: bookmarks, snippets: snippets});
     } else {
-      res.status(200).json({message: "Success, but no data found for this user", document: document});
+      res.status(200).json({message: "Success, but no bookmarks found for this user"});
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({message: "Error while getting user bookmarks"});
+    res.status(500).json({message: "Error while getting user data"});
   }
 
 });
 
+
+// get snippets for user with additional web document info
+router.get("/search/snippet/:userId", neuroneCheckAuth, async (req, res) => {
+
+  if (!mongoose.isValidObjectId(req.body.userId)) {
+    res.status(400).json({"message": "User Id (userId) is not a valid Mongo ID."});
+    return;
+  }
+
+  try {
+
+    // get snippets
+    const snippets = await searchSnippet.find({userId: req.params.userId});
+    
+    console.log("Snippets found:\n", snippets);
+
+    if (snippets){
+      res.status(200).json({message: "Success", snippets: snippets});
+    } else {
+      res.status(200).json({message: "Success, but no snippets found for this user"});
+    }
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error while getting search snippets." });
+  }
+
+});
+
+// save a search snippet
 router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
 
   if (!mongoose.isValidObjectId(req.body.userId)) {
@@ -504,6 +538,7 @@ router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
       snippet: req.body.snippet,
       website: req.body.website,
       websiteUrl: req.body.websiteUrl,
+      websiteTitle: req.body.websiteTitle // ESTOY EN ESTO: HACER QUE SE GUARDE ESTO
     });
 
     // save in database
@@ -516,7 +551,7 @@ router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
   }
 });
 
-
+// synthesis text save
 router.post("/synthesis", neuroneCheckAuth, async (req, res) => {
 
   if (!mongoose.isValidObjectId(req.body.userId)) {

@@ -28,7 +28,7 @@ export default function(
     axios.post('http://localhost:' + neuroneAuthPort + '/auth/checkauth', {jwt: token})
       .then( (response: any) => {
         if (response.data.message !== "OK") {
-          console.log(response);
+          console.log("ERROR: Neurone-Auth did not authorize token.");
           res.status(401).json({message: "Authentication with Neurone-Auth failed"});
         }
         else {
@@ -37,13 +37,15 @@ export default function(
         }
       })
       .catch((err: any) => {
-        console.error(err);
+        console.error("ERROR: axios request to retured an error.");
+        console.error("Status: ", err.response.status);
+        console.error("StatusText: ", err.response.statusText);
         if (!res.headersSent){
           res.status(401).json({message: "Authentication with Neurone-Auth failed"});
         }
       });
   } catch(err) {
-    console.error(err);
+    console.error("Unknown error while authorizing user.");
     if (!res.headersSent){
       res.status(401).json({message: "Authentication with Neurone-Auth failed"});
     }

@@ -7,8 +7,9 @@ const SearchSnippet = new mongoose.Schema({
   dateClient: { type: Date },
   dateServer: { type: Date },
   snippet: { type: String },
-  website: { type: String }, // saved snippet's webpage name
-  websiteUrl: { type: String }, 
+  website: { type: String }, // saved snippet's webpage unique doc name
+  websiteUrl: { type: String },
+  websiteTitle: { type: String }
 })
 
 export default mongoose.model('search-snippet', SearchSnippet);
