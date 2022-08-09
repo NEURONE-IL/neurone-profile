@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
+import useragent from 'useragent';
 
 // Connect URL
 const url = process.env.DB || 'mongodb://127.0.0.1:27017/test';
@@ -52,6 +53,15 @@ app.listen(port, () => {
   return console.log(`server is listening on ${port}`);
 });
 
+app.get("/test", (req, res) => {
 
-app.use(require('./routes/profile') );
+  const browser = useragent.parse(req.headers['user-agent']);
+  res.status(200).json({message: "ok", youare: browser.toString()});
+
+});
+
+
+app.use(require('./routes/search') );
 app.use(require('./routes/logger'));
+app.use(require('./routes/forms'));
+app.use(require('./routes/synthesis'));
