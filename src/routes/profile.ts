@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import Profile from '../models/profile'; // TODO: remove
+import exampleForm from '../../assets/neurone-form-example';
 import FormAnswer from '../models/form-answer';
 import Form from '../models/form'
 import neuroneCheckAuth from "../middleware/check-neurone-auth";
@@ -12,136 +12,6 @@ import SynthesisAnswer from '../models/synthesis';
 
 const router = express.Router();
 
-const exampleForm = {
-  "formName": "questionnaire_example",
-  "controls": [
-    {
-      "title": "Example Title",
-      "hint": "Example Hint",
-      "name": "inputExample",
-      "value": "",
-      "type": "input",
-      "validators": {
-        "required": true,
-        "minLength": 10
-      }
-    },
-    {
-      "title": "Example Title",
-      "hint": "Example Hint",
-      "name": "paraExample",
-      "value": "",
-      "type": "paragraph",
-      "validators": {
-        "required": false,
-        "minLength": 1
-      }
-    },
-    {
-      "title": "Example Checkboxes",
-      "hint": "Example Hint",
-      "name": "checkboxExample",
-      "choices": ["Example 1", "Option 2", "Select 3"],
-      "type": "checkbox",
-      "validators": {
-        "required": false
-      }
-    },
-    {
-      "title": "Example Title",
-      "hint": "Example Hint",
-      "name": "radioExample",
-      "type": "radio",
-      "choices": ["Example 1", "Example 2", "Example 3"],
-      "validators": {
-        "required": false
-      }
-    },
-    {
-      "title": "Pick An option",
-      "hint": "Example Hint",
-      "name": "dropdownExample",
-      "type": "dropdown",
-      "choices": ["Example 1", "Example 2", "Example 3"],
-      "validators": {
-        "required": true
-      }
-    },
-    {
-      "title": "Choose a Date",
-      "hint": "Could be your birthday!",
-      "name": "dateExample",
-      "type": "datepicker",
-      "choices": ["Example 1", "Example 2", "Example 3"],
-      "validators": {
-        "required": true
-      }
-    },
-    {
-      "title": "Rate this question",
-      "hint": "Pick anything!",
-      "name": "scaleExample",
-      "type": "scale",
-      "scaleOptions": {
-        "min": 0,
-        "max": 100,
-        "step": 50,
-        "minLabel": "Bad",
-        "maxLabel": "Great"
-      },
-      "validators": {
-        "required": true
-      }
-    },
-    {
-      "title": "How many stars?",
-      "hint": "Pick anything!",
-      "name": "ratingExample",
-      "type": "rating",
-      "stars": 6,
-      "validators": {
-        "required": true
-      }
-    }
-  ]
-}
-
-
-/*
-router.post("/api/kitten", (req, res) => {
-
-
-  //----------testing mongoose
-
-  const kittySchema = new mongoose.Schema({
-    name: String
-  });
-
-  // NOTE: methods must be added to the schema before compiling it with mongoose.model()
-  kittySchema.methods.speak = function speak() {
-    const greeting = this.name
-      ? "Meow name is " + this.name
-      : "I don't have a name";
-    console.log(greeting);
-  };
-
-  const Kitten = mongoose.model('Kitten', kittySchema);
-
-  const silence = new Kitten({ name: 'Silence' });
-  console.log("kitty name: " + silence.name); // 'Silence'
-
-  const fluffy = new Kitten({ name: 'fluffy' });
-
-  fluffy.save().then();
-  fluffy.speak();
-
-  //----------testing mongoose
-
-
-  res.status(201).json({message: "created"});
-});
-*/
-
 router.get("/test", (req, res) => {
 
   const browser = useragent.parse(req.headers['user-agent']);
@@ -149,38 +19,8 @@ router.get("/test", (req, res) => {
 
 });
 
-
-
-
-
-// TODO: likely unused, remove
-router.post("/profile/number", neuroneCheckAuth, (req, res) => {
-
-  try{
-
-    console.log("let's see...\n" + req.body.email + "\n" + req.body.number);
-
-    const User = new Profile({
-      email: req.body.email,
-      number: req.body.number
-    });
-
-    User.save().then( (result: any) => {
-      console.log(result);
-      res.status(201).json({message: "created", object: result})
-    })
-    .catch((err: any) => {
-      console.error(err)
-    });
-        
-  } catch(err) {
-    console.error(err);
-    res.status(500).json({err: err});
-  }
-});
-
 // for form answers linked to a profile
-router.post("/profile/form", neuroneCheckAuth, (req, res) => {
+router.post("/profile/form", neuroneCheckAuth, async (req, res) => {
 
   const currentDate = Date.now();
 
@@ -196,70 +36,40 @@ router.post("/profile/form", neuroneCheckAuth, (req, res) => {
   console.log("---------------SAVING TO DB-----------------------");
   console.log(form);
 */
-  form.save().then((result:any) => {
+  try {
+    const result = await form.save();
     console.log(result);
     res.status(201).json({message: "Form answer saved successfully", result: result});
-  })
-  .catch( (err:any) => {
+  } catch(err) {
     console.error(err);
-    res.status(500).json({error: err})
-  });
+    res.status(500).json({message: "Error while saving form.", error: err})
+  };
 
 });
 
-// request a form with its name (unique)
-router.get("/form/:name", neuroneCheckAuth, (req, res) => {
+/**
+ * request a form using its name (unique)
+ */
+router.get("/form/:name", neuroneCheckAuth, async (req, res) => {
 
-  let retrievedForm;
-  let finalForm;
+
 
   // search for the form by name, it should be unique in the database
-  Form.find({formName: req.params.name}).then( (forms: any) => {
-    retrievedForm = forms[0]
-    console.log({forms});
-    console.log("FINAL FORM:");
-    console.log(retrievedForm);
+  try {
+    const form = await Form.findOne({formName: req.params.name});
 
     // if retrieval is successful
-    if (retrievedForm){
-
-      finalForm = {
-        formName: retrievedForm.formName,
-        controls: retrievedForm.questions
-      }
-
-      res.status(200).json({message: "Form retrieved.", form: finalForm});
-
+    if (form){
+      res.status(200).json({message: "Form retrieved.", form: form});
     } 
-    // if retrieval fails and the example file was requested then it is saved in the database
-    else if (!retrievedForm && req.params.name === "questionnaire_example"){
-
-      // create the form to be saved in database
-      const form = new Form({
-        formName: req.params.name,
-        questions: exampleForm.controls
-      });
-
-      // save new form and send it to client
-      form.save().then((result:any) => {
-        console.log(result);
-        res.status(200).json({message: "Form retrieved.", form: exampleForm});
-      })
-      .catch( (error: any) => {
-        console.error(error);
-        res.status(500).json({error: error})
-      });
-
-      
+    // if form is not found send an example form
+    else if (!form){
+      res.status(200).json({ message: "Form not found, sending example form instead." , form: exampleForm});
     }
-    // if retrieval fails because it isn't in the database
-    else {
-      res.status(404).json({message: "Form not found."});
-    }
-  }).catch((error: any) => {
-    console.error(error);
-    res.status(500).json({message: "Error retrieving document.", error: error});
-  })
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({message: "Error retrieving document.", error: err});
+  }
 
 });
 
@@ -310,7 +120,7 @@ router.delete("/form/:formName", neuroneCheckAuth, (req, res) => {
     if (result.deletedCount > 0){
       res.status(200).json({ message: 'Form deleted.' });
     } else {
-      res.status(404).json({ message: 'Could not delete form.' });
+      res.status(200).json({ message: 'Could not delete form.' });
     }
   }).catch((error: any) => {
     console.error(error);
@@ -344,7 +154,7 @@ router.get("/search/bookmark/saved/:userId", neuroneCheckAuth, async (req, res) 
     console.log("BOOKMARKS:\n", bookmarkDocs);
 
     if (bookmarkDocs.length === 0) {
-      res.status(404); // TODO: 200 con mensaje de vacío y data en vacío
+      res.status(200).json({message: "No bookmarks found.", data: []});
     }
 
     res.status(200).json({message: "Bookmarks found", data: bookmarkDocs});
@@ -374,7 +184,7 @@ router.get("/search/bookmark/all/:userId", neuroneCheckAuth, async (req, res) =>
     console.log("BOOKMARKS:\n", bookmarkDocs);
 
     if (bookmarkDocs.length === 0) {
-      res.status(404);
+      res.status(200).json({message: "No bookmarks found.", data: []});
     }
 
     res.status(200).json({message: "Bookmarks found", data: bookmarkDocs});
@@ -452,11 +262,9 @@ router.put("/search/bookmark/:userId/:docId", neuroneCheckAuth, async (req, res)
     // no docs found
     if (!doc) {
       console.log("Not found doc with this combination:\nuserID:  \t" + req.params.userId + "\ndoc name:\t" + req.body.website);
-      res.sendStatus(404);
+      res.sendStatus(200).json({message: "Document not found", data: []});
       return;
     }
-
-
 
     res.sendStatus(204);
   } catch (err) {
@@ -486,7 +294,7 @@ router.get("/search/user/:userId", neuroneCheckAuth, async (req, res) => {
 });
 
 
-// get snippets for user with additional web document info
+// get snippets for user
 router.get("/search/snippet/:userId", neuroneCheckAuth, async (req, res) => {
 
   if (!mongoose.isValidObjectId(req.body.userId)) {
@@ -499,7 +307,7 @@ router.get("/search/snippet/:userId", neuroneCheckAuth, async (req, res) => {
     // get snippets
     const snippets = await searchSnippet.find({userId: req.params.userId});
     
-    console.log("Snippets found:\n", snippets);
+    console.log("Found " + snippets.length + " snippets for the user " + req.params.userId);
 
     if (snippets){
       res.status(200).json({message: "Success", snippets: snippets});
