@@ -10,7 +10,8 @@ const SearchBookmark = new mongoose.Schema({
       dateClient: { type: Date },
       dateServer: { type: Date },
     }], // to keep track of the changes of this user/website bookmark
-  website: { type: String }, // saved webpage
+  website: { type: String, unique: true }, // saved webpage unique name
+  websiteTitle: { type: String }, // saved webpage title in the SERP
   websiteUrl: { type: String }, 
   saved: { type: Boolean } // current saved state
 })

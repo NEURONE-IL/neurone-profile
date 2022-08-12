@@ -8,7 +8,7 @@ export default function(
 
   try {
     
-    if (process.env.disableAuth) {
+    if (process.env.DISABLEAUTH) {
       console.log("*\n*\n*\n*\n*\n*\n*-------->CHECK AUTH DISABLED\n*\n*\n*\n*\n*\n*\n*\n*\n*\n");
       next();
       return;

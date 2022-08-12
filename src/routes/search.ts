@@ -95,6 +95,7 @@ router.post("/search/bookmark", neuroneCheckAuth, async (req, res) => {
         dateServer: serverDate,
       }],
       website: req.body.website,
+      websiteTitle: req.body.websiteTitle,
       websiteUrl: req.body.websiteUrl,
       saved: true
     });
@@ -113,7 +114,7 @@ router.post("/search/bookmark", neuroneCheckAuth, async (req, res) => {
 router.put("/search/bookmark/:userId/:docId", neuroneCheckAuth, async (req, res) => {
 
   if (!mongoose.isValidObjectId(req.params.userId)) {
-    res.status(400).json({"message": "User Id is not a valid Mongo ID."});
+    res.status(400).json({message: "User Id is not a valid Mongo ID."});
     return;
   }
 
@@ -134,16 +135,18 @@ router.put("/search/bookmark/:userId/:docId", neuroneCheckAuth, async (req, res)
     }
 
     const doc = await SearchBookmark.findOneAndUpdate(filter, update, {new: true}); // note: this assumes this doc is unique (it should be with this API)
-    console.log ("UPDATED DOC:\n", doc);
+    //console.log ("UPDATED DOC:\n", doc);
 
     // no docs found
     if (!doc) {
-      console.log("Not found doc with this combination:\nuserID:  \t" + req.params.userId + "\ndoc name:\t" + req.body.website);
-      res.sendStatus(200).json({message: "Document not found", data: []});
+      console.log("</search/bookmark/:userId/:docId>: Did not find doc with this combination:\nuserID:  \t" + req.params.userId + "\ndoc name:\t" + req.body.website);
+      res.status(200).json({message: "Document not found", data: []});
       return;
     }
 
-    res.sendStatus(204);
+    const allDocs = await SearchBookmark.find({ userId: req.params.userId, saved: true });
+
+    res.status(200).json({message: "Bookmark edited successfully", data: allDocs});
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error while looking for document in database. See backend console for details."});
