@@ -14,7 +14,7 @@
   "dependencies": {
     "@types/mongoose-unique-validator": "^1.0.5",
     "@types/useragent": "^2.3.1",
-    "axios": "^0.24.0",
+    "axios": "^0.27.0",
     "dotenv": "^16.0.1",
     "express": "^4.17.1",
     "mongodb": "^4.2.0",
