@@ -211,9 +211,6 @@ router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
   }
 
   try {
-    const queryOptions: mongoose.QueryOptions = {
-      new: true
-    }
 
     const serverDate = Date.now();
 
@@ -226,11 +223,11 @@ router.post("/search/snippet", neuroneCheckAuth, async (req, res) => {
       snippet: req.body.snippet,
       website: req.body.website,
       websiteUrl: req.body.websiteUrl,
-      websiteTitle: req.body.websiteTitle // ESTOY EN ESTO: HACER QUE SE GUARDE ESTO
+      websiteTitle: req.body.websiteTitle
     });
 
     // save in database
-    const newDocument = await newSnippetData.save(queryOptions);
+    const newDocument = await newSnippetData.save();
 
     res.status(201).json({message: "Saved snippet successfully", document: newDocument});
   } catch(err){

@@ -33,7 +33,6 @@ export default function(
     }
 
 
-
     axios.post('http://localhost:' + neuroneAuthPort + '/auth/checkauth', {}, axiosConfig)
       .then( (response: any) => {
         if (response.data.message !== "OK") {
