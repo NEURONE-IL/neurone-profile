@@ -3,6 +3,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import useragent from 'useragent';
 
+// swagger
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerOptions from './docs/openapiconf';
+
 // Connect URL
 const url = process.env.DB || 'mongodb://127.0.0.1:27017/test';
 
@@ -46,11 +51,17 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', (req, res) => {
-    res.send(`This is the neurone-profile backend on port ${port}!`);
-});
+// swagger docs
+const docSpecs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(docSpecs));
+
 app.listen(port, () => {
   return console.log(`server is listening on ${port}`);
+});
+
+
+app.get('/', (req, res) => {
+  res.send(`This is the neurone-profile backend on port ${port}!`);
 });
 
 app.get("/test", (req, res) => {
