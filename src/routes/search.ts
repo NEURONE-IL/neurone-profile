@@ -1,7 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import neuroneCheckAuth from "../middleware/check-neurone-auth";
-import useragent from 'useragent';
 import SearchBookmark from '../models/search-bookmark';
 import searchSnippet from '../models/search-snippet';
 

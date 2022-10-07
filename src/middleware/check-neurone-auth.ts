@@ -10,7 +10,7 @@ export default function(
   try {
     
     if (process.env.DISABLEAUTH) {
-      console.log("*\n*\n*\n*\n*\n*\n*-------->CHECK AUTH DISABLED\n*\n*\n*\n*\n*\n*\n*\n*\n*\n");
+      console.log("*\n*\n*\n*\n*\n*\n*-------->CHECK AUTH DISABLED FROM ENV VARIABLE: DISABLEAUTH\n*\n*\n*\n*\n*\n*\n*\n*\n*\n");
       next();
       return;
     }
