@@ -5,14 +5,17 @@ const logKeyboardSchema = new mongoose.Schema({
   userEmail : { type: String }, 
   type      : { type: String },
   source    : { type: String },
-  target    : { type: String },
   url       : { type: String },
+  timestampClient: { type: Number },
+  timestampServer: { type: Number },
   dateClient: { type: Date },
   dateServer: { type: Date },
-  which     : { type: String },
-  keyCode   : { type: String },
-  charCode  : { type: String },
+  target    : { type: String },
   key       : { type: String },
+  code      : { type: String },
+  keyCode   : { type: Number },
+  which     : { type: Number },
+  charCode  : { type: Number },
 });
 
 export default mongoose.model('log-keyboard', logKeyboardSchema);
