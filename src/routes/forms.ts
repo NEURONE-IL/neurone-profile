@@ -3,6 +3,7 @@ import exampleForm from '../../assets/neurone-form-example';
 import FormAnswer from '../models/form-answer';
 import Form from '../models/form'
 import neuroneCheckAuth from "../middleware/check-neurone-auth";
+import mongoose from 'mongoose';
 const router = express.Router();
 
 /**
@@ -99,6 +100,35 @@ const router = express.Router();
  *              type: number
  *              description: For the text input questions. The maximum ammount of letters for the answer to be valid.
  *              example: 100
+ *    FormAnswer:
+ *      type: object
+ *      properties:
+ *        question:
+ *          type: string
+ *          description: An ID text for the questions/activities
+ *          example: checkboxExample
+ *        formType:
+ *          type: string
+ *          description: The type of question it is (input/paragraph/checkbox/radio/dropdown/datepicker/scale/rating)
+ *        answer:
+ *          type: string
+ *          description: The answer given by the user
+ *          example: 
+ *        answerArray:
+ *          type: array
+ *          items:
+ *            type: object
+ *            properties:
+ *              question:
+ *                type: string
+ *                description: The text of the answer
+ *                example: Apples
+ *              answer:
+ *                type: boolean
+ *                description: The checkbox answer
+ *                example: true
+ *          description: FOR THE CHECKBOX TYPE OF QUESTIONS. All the options selected in these kind of questions.
+ *            
  */
 
 /**
@@ -360,9 +390,119 @@ router.delete("/form/:formName", neuroneCheckAuth, async (req, res) => {
 });
 
 // for form answers linked to a profile
+/**
+ * @swagger
+ * /profile/form:
+ *  post:
+ *    summary: Save a form answer and link it to a profile
+ *    tags: [Forms]
+ *    requestBody:
+ *      required: true
+ *      content: 
+ *        application/json:
+ *          schema:
+ *            #add the body stuff, and for question use the component i made
+ *            type: object
+ *            properties:
+ *              userId:
+ *                type: string
+ *                description: The Mongo ID of the user
+ *                example: 633329cce9d7d30ef7fe68b2
+ *              username:
+ *                type: string
+ *                description: The username of the account posting the text
+ *                example: Neurone Admin
+ *              formId:
+ *                type: string
+ *                description: The formName field in the form database to identify the form being answered
+ *                example: example_file
+ *              clientDate: 
+ *                type: number
+ *                description: >
+ *                  The date in milliseconds of the client when it called the API. 
+ *                  Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
+ *                example: 1665182096409  
+ *              questions:
+ *                type: array
+ *                items: 
+ *                  $ref: '#/components/schemas/FormAnswer'
+ *    responses:
+ *      201:
+ *        description: Operation completed successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A small message describing the result
+ *                  example: Form answer saved successfully
+ *                result:
+ *                  type: object
+ *                  properties:
+ *                    userId:
+ *                      type: string
+ *                      description: The Mongo ID of the user
+ *                      example: 633329cce9d7d30ef7fe68b2
+ *                    username:
+ *                      type: string
+ *                      description: The username of the account posting the text
+ *                      example: Neurone Admin
+ *                    formId:
+ *                      type: string
+ *                      description: The formName field in the form database to identify the form being answered
+ *                      example: example_file
+ *                    clientDate: 
+ *                      type: string
+ *                      description: >
+ *                        The date of the client when it called the API. 
+ *                        Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
+ *                      example: 1665182096409
+ *                    serverDate: 
+ *                      type: number
+ *                      description: >
+ *                        The date of the server when it received the request
+ *                        Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
+ *                      example: 1665182096409    
+ *                    questions:
+ *                      description: An array with all the answers
+ *                      type: array
+ *                      items:
+ *                        $ref: '#/components/schemas/FormAnswer'
+ *      400:
+ *        description: The Mongo ID parameter is not valid.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A small message describing the error
+ *                  example: User Id in parameter is not a valid Mongo ID.
+ *      500:
+ *        description: Server error while saving the answers, look at the server's console for details
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A small message describing the error
+ *                  example: Error while saving form
+ */
 router.post("/profile/form", neuroneCheckAuth, async (req, res) => {
 
+  if (!mongoose.isValidObjectId(req.body.userId)) {
+    res.status(400).json({"message": "User Id (userId) is not a valid Mongo ID."});
+    return;
+  }
+
   const currentDate = Date.now();
+
+  console.log(req.body);
 
   const form = new FormAnswer({
     userId: req.body.userId,
