@@ -33,7 +33,9 @@ router.get("/search/bookmark/saved/:userId", neuroneCheckAuth, async (req, res) 
       res.status(200).json({message: "No bookmarks found.", data: []});
     }
 
-    res.status(200).json({message: "Bookmarks found", data: bookmarkDocs});
+    if(!res.headersSent){
+      res.status(200).json({message: "Bookmarks found", data: bookmarkDocs});
+    }
 
   } catch (err) {
     console.error(err);
