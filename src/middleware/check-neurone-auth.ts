@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from 'axios';
 import 'dotenv/config';
 const axios = require('axios').default;
 
@@ -9,7 +10,7 @@ export default function(
   try {
     
     if (process.env.DISABLEAUTH) {
-      console.log("*\n*\n*\n*\n*\n*\n*-------->CHECK AUTH DISABLED\n*\n*\n*\n*\n*\n*\n*\n*\n*\n");
+      console.log("*\n*\n*\n*\n*\n*\n*-------->CHECK AUTH DISABLED FROM ENV VARIABLE: DISABLEAUTH\n*\n*\n*\n*\n*\n*\n*\n*\n*\n");
       next();
       return;
     }
@@ -17,15 +18,22 @@ export default function(
     const neuroneAuthPort = process.env.NEURONE_AUTH_PORT || 3005;
 
     // pattern of the token in the header file: "Bearer <token here>"
-    let token = ""
+    let axiosConfig: AxiosRequestConfig;
     if (req.headers.authorization){
-      token = req.headers.authorization.split(" ")[1];
+      // format the jwt token for neurone-auth
+      axiosConfig = {
+        headers: { Authorization:  req.headers.authorization} 
+      }
+      console.log("TOKEN TEST: ", axiosConfig);
     }
     else {
       console.log("[check-neurone-auth] No token found in headers");
       res.status(401).json({message: "Authentication with Neurone-Auth failed"});
+      return;
     }
-    axios.post('http://localhost:' + neuroneAuthPort + '/auth/checkauth', {jwt: token})
+
+
+    axios.post('http://localhost:' + neuroneAuthPort + '/auth/checkauth', {}, axiosConfig)
       .then( (response: any) => {
         if (response.data.message !== "OK") {
           console.log("ERROR: Neurone-Auth did not authorize token.");

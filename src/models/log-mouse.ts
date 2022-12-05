@@ -6,6 +6,8 @@ const logMouseSchema = new mongoose.Schema({
   type  : { type: String },
   source: { type: String },
   url   : { type: String },
+  timestampClient: { type: Number },
+  timestampServer: { type: Number },
   dateClient: { type: Date },
   dateServer: { type: Date },
   x_win : { type: Number },
